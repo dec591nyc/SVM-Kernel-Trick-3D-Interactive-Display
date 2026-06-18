@@ -158,14 +158,9 @@ degree = 3
 if kernel == "poly":
     degree = st.sidebar.slider("多項式階數 (Degree)", min_value=1, max_value=6, value=3, step=1)
 
-# 色彩主題與動畫設定
+# 圖表視覺效果設定
 st.sidebar.markdown("---")
 st.sidebar.subheader("圖表視覺效果設定")
-
-color_theme = st.sidebar.selectbox(
-    "圖表色彩主題",
-    options=["經典藍紅 (Modern Blue/Red)", "日系粉藍 (Manim Sakura/Sky)"]
-)
 
 enable_animation = st.sidebar.checkbox(
     "啟用 3D 空間拉升/變形動畫",
@@ -186,38 +181,19 @@ xx, yy, Z = get_decision_grid(model, X, grid_resolution=100, bounds=fixed_bounds
 # 取得支援向量
 support_vectors = model.support_vectors_
 
-# 色彩樣式設定
-if color_theme == "經典藍紅 (Modern Blue/Red)":
-    color_class_0 = '#3b82f6'       # 藍色
-    color_class_1 = '#ef4444'       # 紅色
-    color_sv = '#eab308'            # 金黃色 (支援向量)
-    color_sv_bg = 'rgba(234, 179, 8, 0.15)'
-    color_boundary = '#eab308'      # 決策邊界
-    colorscale_bg = [
-        [0.0, '#3b82f6'],
-        [0.5, 'rgba(255, 255, 255, 0.85)'],
-        [1.0, '#ef4444']
-    ]
-    colorscale_surf = 'RdBu'
-    reversescale_surf = True
-else:
-    # 日系粉藍 (Manim Sakura/Sky)
-    color_class_0 = '#ffb7c5'       # 櫻花粉
-    color_class_1 = '#a5f3fc'       # 晴空藍
-    color_sv = '#facc15'            # 耀金黃
-    color_sv_bg = 'rgba(250, 204, 21, 0.15)'
-    color_boundary = '#facc15'
-    colorscale_bg = [
-        [0.0, '#ffb7c5'],
-        [0.5, 'rgba(255, 255, 255, 0.85)'],
-        [1.0, '#a5f3fc']
-    ]
-    colorscale_surf = [
-        [0.0, '#ffb7c5'],
-        [0.5, '#ffffff'],
-        [1.0, '#a5f3fc']
-    ]
-    reversescale_surf = False
+# 色彩樣式設定 (固定使用經典藍紅 Modern Blue/Red 佈局)
+color_class_0 = '#3b82f6'       # 藍色
+color_class_1 = '#ef4444'       # 紅色
+color_sv = '#eab308'            # 金黃色 (支援向量)
+color_sv_bg = 'rgba(234, 179, 8, 0.15)'
+color_boundary = '#eab308'      # 決策邊界
+colorscale_bg = [
+    [0.0, '#3b82f6'],
+    [0.5, 'rgba(255, 255, 255, 0.85)'],
+    [1.0, '#ef4444']
+]
+colorscale_surf = 'RdBu'
+reversescale_surf = True
 
 # ------------------------------------------------------------------------------
 # 主要顯示標籤頁
@@ -444,7 +420,7 @@ with tab_3d:
         # 繪製拋物面
         fig_3d.add_trace(go.Surface(
             x=u, y=v, z=zz_paraboloid,
-            colorscale='Blues' if color_theme == "經典藍紅 (Modern Blue/Red)" else 'PuBu',
+            colorscale='Blues',
             opacity=0.35,
             showscale=False,
             name='投影拋物面'
@@ -456,7 +432,7 @@ with tab_3d:
         
         fig_3d.add_trace(go.Surface(
             x=u, y=v, z=zz_plane,
-            colorscale=[[0, 'rgba(234, 179, 8, 0.4)'], [1, 'rgba(234, 179, 8, 0.4)']] if color_theme == "經典藍紅 (Modern Blue/Red)" else [[0, 'rgba(250, 204, 21, 0.4)'], [1, 'rgba(250, 204, 21, 0.4)']],
+            colorscale=[[0, 'rgba(234, 179, 8, 0.4)'], [1, 'rgba(234, 179, 8, 0.4)']],
             opacity=0.45,
             showscale=False,
             name='分割超平面'
