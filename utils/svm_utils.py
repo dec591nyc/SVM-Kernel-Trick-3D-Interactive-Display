@@ -29,7 +29,7 @@ def fit_svm_model(X, y, kernel='rbf', C=1.0, gamma='scale', degree=3):
     model.fit(X, y)
     return model
 
-def get_decision_grid(model, X, grid_resolution=150, padding=0.2):
+def get_decision_grid(model, X, grid_resolution=150, padding=0.2, bounds=None):
     """
     Generates a 2D meshgrid and computes the decision function values.
     
@@ -38,14 +38,18 @@ def get_decision_grid(model, X, grid_resolution=150, padding=0.2):
         X (np.ndarray): Input features, shape (n_samples, 2), used to determine limits.
         grid_resolution (int): Number of points in each grid dimension.
         padding (float): Margin added around the max/min bounds of X.
+        bounds (tuple or list): Optional, (x_min, x_max, y_min, y_max) to override dynamic limits.
         
     Returns:
         xx (np.ndarray): X coordinates of grid mesh.
         yy (np.ndarray): Y coordinates of grid mesh.
         Z (np.ndarray): Decision values for the grid mesh, shape (grid_resolution, grid_resolution).
     """
-    x_min, x_max = X[:, 0].min() - padding, X[:, 0].max() + padding
-    y_min, y_max = X[:, 1].min() - padding, X[:, 1].max() + padding
+    if bounds is not None:
+        x_min, x_max, y_min, y_max = bounds
+    else:
+        x_min, x_max = X[:, 0].min() - padding, X[:, 0].max() + padding
+        y_min, y_max = X[:, 1].min() - padding, X[:, 1].max() + padding
     
     xx, yy = np.meshgrid(
         np.linspace(x_min, x_max, grid_resolution),

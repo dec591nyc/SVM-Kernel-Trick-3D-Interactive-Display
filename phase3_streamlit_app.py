@@ -158,15 +158,66 @@ degree = 3
 if kernel == "poly":
     degree = st.sidebar.slider("多項式階數 (Degree)", min_value=1, max_value=6, value=3, step=1)
 
+# 色彩主題與動畫設定
+st.sidebar.markdown("---")
+st.sidebar.subheader("圖表視覺效果設定")
+
+color_theme = st.sidebar.selectbox(
+    "圖表色彩主題",
+    options=["經典藍紅 (Modern Blue/Red)", "日系粉藍 (Manim Sakura/Sky)"]
+)
+
+enable_animation = st.sidebar.checkbox(
+    "啟用 3D 空間拉升/變形動畫",
+    value=True,
+    help="在 3D 視圖中啟用點與曲面的動態拉升/變形過渡動畫。關閉則顯示靜態 3D 視圖。"
+)
+
 # 生成 concentric circles 資料集
 X, y = generate_concentric_circles(noise=noise_level, n_samples=num_points, random_seed=random_seed)
 
 # 訓練 SVM 模型
 model = fit_svm_model(X, y, kernel=kernel, C=C, gamma=gamma, degree=degree)
-xx, yy, Z = get_decision_grid(model, X, grid_resolution=100, padding=0.2)
+
+# 使用固定邊界生成決策網格，避免隨參數調整發生版面位移
+fixed_bounds = (-2.3, 2.3, -2.3, 2.3)
+xx, yy, Z = get_decision_grid(model, X, grid_resolution=100, bounds=fixed_bounds)
 
 # 取得支援向量
 support_vectors = model.support_vectors_
+
+# 色彩樣式設定
+if color_theme == "經典藍紅 (Modern Blue/Red)":
+    color_class_0 = '#3b82f6'       # 藍色
+    color_class_1 = '#ef4444'       # 紅色
+    color_sv = '#eab308'            # 金黃色 (支援向量)
+    color_sv_bg = 'rgba(234, 179, 8, 0.15)'
+    color_boundary = '#eab308'      # 決策邊界
+    colorscale_bg = [
+        [0.0, '#3b82f6'],
+        [0.5, 'rgba(255, 255, 255, 0.85)'],
+        [1.0, '#ef4444']
+    ]
+    colorscale_surf = 'RdBu'
+    reversescale_surf = True
+else:
+    # 日系粉藍 (Manim Sakura/Sky)
+    color_class_0 = '#ffb7c5'       # 櫻花粉
+    color_class_1 = '#a5f3fc'       # 晴空藍
+    color_sv = '#facc15'            # 耀金黃
+    color_sv_bg = 'rgba(250, 204, 21, 0.15)'
+    color_boundary = '#facc15'
+    colorscale_bg = [
+        [0.0, '#ffb7c5'],
+        [0.5, 'rgba(255, 255, 255, 0.85)'],
+        [1.0, '#a5f3fc']
+    ]
+    colorscale_surf = [
+        [0.0, '#ffb7c5'],
+        [0.5, '#ffffff'],
+        [1.0, '#a5f3fc']
+    ]
+    reversescale_surf = False
 
 # ------------------------------------------------------------------------------
 # 主要顯示標籤頁
@@ -199,11 +250,7 @@ with tab_2d:
             x=xx[0, :],
             y=yy[:, 0],
             z=Z,
-            colorscale=[
-                [0.0, '#3b82f6'],                   # 藍色對應類別 0 (內圈)
-                [0.5, 'rgba(255, 255, 255, 0.85)'], # 灰色過渡帶
-                [1.0, '#ef4444']                    # 紅色對應類別 1 (外圈)
-            ],
+            colorscale=colorscale_bg,
             opacity=0.45,
             showscale=True,
             colorbar=dict(
@@ -217,7 +264,7 @@ with tab_2d:
             hoverinfo='skip'
         ))
         
-        # 2. 決策邊界線 (f(x, y) = 0) - 黃色
+        # 2. 決策邊界線 (f(x, y) = 0)
         fig_2d.add_trace(go.Contour(
             x=xx[0, :],
             y=yy[:, 0],
@@ -229,7 +276,7 @@ with tab_2d:
                 coloring='none',
                 showlines=True
             ),
-            line=dict(color='#eab308', width=4),
+            line=dict(color=color_boundary, width=4),
             hoverinfo='skip',
             name='決策邊界 f(x,y)=0'
         ))
@@ -252,30 +299,30 @@ with tab_2d:
             name='間距邊界 f(x,y)=±1'
         ))
         
-        # 4. 繪製類別 0 點 (內圈 - 藍色)
+        # 4. 繪製類別 0 點 (內圈)
         fig_2d.add_trace(go.Scatter(
             x=X[y == 0, 0],
             y=X[y == 0, 1],
             mode='markers',
             marker=dict(
-                color='#3b82f6',
+                color=color_class_0,
                 size=8,
                 line=dict(color='#1e293b', width=1.0)
             ),
-            name='類別 0 (內圈 - 藍點)'
+            name='類別 0 (內圈)'
         ))
         
-        # 5. 繪製類別 1 點 (外圈 - 紅色)
+        # 5. 繪製類別 1 點 (外圈)
         fig_2d.add_trace(go.Scatter(
             x=X[y == 1, 0],
             y=X[y == 1, 1],
             mode='markers',
             marker=dict(
-                color='#ef4444',
+                color=color_class_1,
                 size=8,
                 line=dict(color='#1e293b', width=1.0)
             ),
-            name='類別 1 (外圈 - 紅點)'
+            name='類別 1 (外圈)'
         ))
         
         # 6. 支援向量高亮框 (黃金環)
@@ -284,27 +331,27 @@ with tab_2d:
             y=support_vectors[:, 1],
             mode='markers',
             marker=dict(
-                color='rgba(234, 179, 8, 0.15)',
+                color=color_sv_bg,
                 size=14,
-                line=dict(color='#eab308', width=2.0)
+                line=dict(color=color_sv, width=2.0)
             ),
             name='支援向量 (Support Vectors)'
         ))
         
-        # 2D 圖形排版調整
+        # 2D 圖形排版調整 - 固定坐標範圍，確保調整參數時不位移
         fig_2d.update_layout(
             width=600,
             height=600,
             xaxis=dict(
                 title='X1 軸', 
-                range=[xx.min(), xx.max()], 
+                range=[-2.2, 2.2], 
                 showgrid=True, 
                 gridcolor='#e2e8f0',
                 constrain="domain"  # 強制約束繪圖區比例
             ),
             yaxis=dict(
                 title='X2 軸', 
-                range=[yy.min(), yy.max()], 
+                range=[-2.2, 2.2], 
                 showgrid=True, 
                 gridcolor='#e2e8f0',
                 scaleanchor="x",
@@ -322,7 +369,7 @@ with tab_2d:
             margin=dict(l=40, r=40, t=50, b=40)
         )
         
-        st.plotly_chart(fig_2d, use_container_width=True)
+        st.plotly_chart(fig_2d, width='stretch')
         
     with col_info:
         st.markdown("### 📊 資料集統計資訊")
@@ -397,7 +444,7 @@ with tab_3d:
         # 繪製拋物面
         fig_3d.add_trace(go.Surface(
             x=u, y=v, z=zz_paraboloid,
-            colorscale='Blues',
+            colorscale='Blues' if color_theme == "經典藍紅 (Modern Blue/Red)" else 'PuBu',
             opacity=0.35,
             showscale=False,
             name='投影拋物面'
@@ -409,51 +456,94 @@ with tab_3d:
         
         fig_3d.add_trace(go.Surface(
             x=u, y=v, z=zz_plane,
-            colorscale=[[0, 'rgba(234, 179, 8, 0.4)'], [1, 'rgba(234, 179, 8, 0.4)']], # 黃色超平面
+            colorscale=[[0, 'rgba(234, 179, 8, 0.4)'], [1, 'rgba(234, 179, 8, 0.4)']] if color_theme == "經典藍紅 (Modern Blue/Red)" else [[0, 'rgba(250, 204, 21, 0.4)'], [1, 'rgba(250, 204, 21, 0.4)']],
             opacity=0.45,
             showscale=False,
             name='分割超平面'
         ))
         
         # 3. 繪製相交邊界圓 (半徑為 0.5 的平方根)
-        t = np.linspace(0, 2*np.pi, 100)
+        t_circle = np.linspace(0, 2*np.pi, 100)
         circle_r = np.sqrt(plane_height)
-        cx = circle_r * np.cos(t)
-        cy = circle_r * np.sin(t)
-        cz = np.ones_like(t) * plane_height
+        cx = circle_r * np.cos(t_circle)
+        cy = circle_r * np.sin(t_circle)
+        cz = np.ones_like(t_circle) * plane_height
         
         fig_3d.add_trace(go.Scatter3d(
             x=cx, y=cy, z=cz,
             mode='lines',
-            line=dict(color='#eab308', width=5),
+            line=dict(color=color_sv, width=5),
             name='交會相割邊界線'
         ))
         
-        # 4. 繪製已投影的類別 0 點 (內圈 - 藍色)
+        # 4. 繪製已投影的類別 0 點
         X_0 = X[y == 0]
         z_0 = X_0[:, 0]**2 + X_0[:, 1]**2
         fig_3d.add_trace(go.Scatter3d(
             x=X_0[:, 0], y=X_0[:, 1], z=z_0,
             mode='markers',
-            marker=dict(color='#3b82f6', size=5, line=dict(color='#1e293b', width=1)),
-            name='類別 0 (內圈 - 藍點)'
+            marker=dict(color=color_class_0, size=5, line=dict(color='#1e293b', width=1)),
+            name='類別 0 (內圈)'
         ))
         
-        # 5. 繪製已投影的類別 1 點 (外圈 - 紅色)
+        # 5. 繪製已投影的類別 1 點
         X_1 = X[y == 1]
         z_1 = X_1[:, 0]**2 + X_1[:, 1]**2
         fig_3d.add_trace(go.Scatter3d(
             x=X_1[:, 0], y=X_1[:, 1], z=z_1,
             mode='markers',
-            marker=dict(color='#ef4444', size=5, line=dict(color='#1e293b', width=1)),
-            name='類別 1 (外圈 - 紅點)'
+            marker=dict(color=color_class_1, size=5, line=dict(color='#1e293b', width=1)),
+            name='類別 1 (外圈)'
         ))
         
+        # 啟用 3D 空間拉升動畫
+        if enable_animation:
+            frames = []
+            steps = np.linspace(0.0, 1.0, 11)
+            for i, val in enumerate(steps):
+                frames.append(go.Frame(
+                    data=[
+                        go.Surface(z=val * zz_paraboloid),
+                        go.Surface(z=val * zz_plane),
+                        go.Scatter3d(z=val * cz),
+                        go.Scatter3d(z=val * z_0),
+                        go.Scatter3d(z=val * z_1)
+                    ],
+                    name=f"frame_{i}"
+                ))
+            fig_3d.frames = frames
+            
+            fig_3d.update_layout(
+                updatemenus=[dict(
+                    type="buttons",
+                    showactive=False,
+                    x=0.1, y=-0.1,
+                    buttons=[
+                        dict(label="播放 (Play)", method="animate", args=[None, {"frame": {"duration": 150, "redraw": True}, "fromcurrent": True}]),
+                        dict(label="暫停 (Pause)", method="animate", args=[[None], {"frame": {"duration": 0, "redraw": False}, "mode": "immediate", "transition": {"duration": 0}}])
+                    ]
+                )],
+                sliders=[dict(
+                    steps=[
+                        dict(
+                            method='animate',
+                            args=[[f'frame_{i}'], {'frame': {'duration': 150, 'redraw': True}, 'mode': 'immediate'}],
+                            label=f'{int(val*100)}%'
+                        )
+                        for i, val in enumerate(steps)
+                    ],
+                    x=0.25, y=-0.1, len=0.75,
+                    currentvalue=dict(font=dict(size=12), prefix='拉升比例: ', visible=True, xanchor='right')
+                )]
+            )
+            
         fig_3d.update_layout(
             scene=dict(
                 xaxis_title='X1 軸',
                 yaxis_title='X2 軸',
                 zaxis_title='Z 高度 (x1² + x2²)',
+                xaxis=dict(range=[-2.2, 2.2]),
+                yaxis=dict(range=[-2.2, 2.2]),
                 zaxis=dict(range=[0, 3.5])
             )
         )
@@ -469,8 +559,8 @@ with tab_3d:
             x=xx[0, :],
             y=yy[:, 0],
             z=Z,
-            colorscale='RdBu',
-            reversescale=True,
+            colorscale=colorscale_surf,
+            reversescale=reversescale_surf,
             opacity=0.6,
             showscale=True,
             colorbar=dict(
@@ -479,14 +569,14 @@ with tab_3d:
                     side='right'
                 )
             ),
-            # 高亮黃色交界線與投影投影到地面
+            # 高亮黃色交界線與投影到地面
             contours=dict(
                 z=dict(
                     show=True,
                     start=0.0,
                     end=0.0,
                     size=1.0,
-                    color='#eab308',
+                    color=color_boundary,
                     width=4,
                     project=dict(z=True)
                 )
@@ -509,22 +599,20 @@ with tab_3d:
         ))
         
         # 3. 繪製點在曲面上的對應位置高度
-        # 類別 0: 藍色
         Z_0 = model.decision_function(X[y == 0])
         fig_3d.add_trace(go.Scatter3d(
             x=X[y == 0, 0], y=X[y == 0, 1], z=Z_0,
             mode='markers',
-            marker=dict(color='#3b82f6', size=4, line=dict(color='#1e293b', width=1)),
-            name='類別 0 (內圈 - 藍點)'
+            marker=dict(color=color_class_0, size=4, line=dict(color='#1e293b', width=1)),
+            name='類別 0 (內圈)'
         ))
         
-        # 類別 1: 紅色
         Z_1 = model.decision_function(X[y == 1])
         fig_3d.add_trace(go.Scatter3d(
             x=X[y == 1, 0], y=X[y == 1, 1], z=Z_1,
             mode='markers',
-            marker=dict(color='#ef4444', size=4, line=dict(color='#1e293b', width=1)),
-            name='類別 1 (外圈 - 紅點)'
+            marker=dict(color=color_class_1, size=4, line=dict(color='#1e293b', width=1)),
+            name='類別 1 (外圈)'
         ))
         
         # 支援向量
@@ -532,10 +620,51 @@ with tab_3d:
         fig_3d.add_trace(go.Scatter3d(
             x=support_vectors[:, 0], y=support_vectors[:, 1], z=Z_sv,
             mode='markers',
-            marker=dict(color='rgba(234, 179, 8, 0.2)', size=7, line=dict(color='#eab308', width=2)),
+            marker=dict(color=color_sv_bg, size=7, line=dict(color=color_sv, width=2)),
             name='支援向量 (Support Vectors)'
         ))
         
+        # 啟用 True RBF 3D 空間地形變形動畫
+        if enable_animation:
+            frames = []
+            steps = np.linspace(0.0, 1.0, 11)
+            for i, val in enumerate(steps):
+                frames.append(go.Frame(
+                    data=[
+                        go.Surface(z=val * Z),
+                        go.Surface(z=zz_zero),
+                        go.Scatter3d(z=val * Z_0),
+                        go.Scatter3d(z=val * Z_1),
+                        go.Scatter3d(z=val * Z_sv)
+                    ],
+                    name=f"frame_{i}"
+                ))
+            fig_3d.frames = frames
+            
+            fig_3d.update_layout(
+                updatemenus=[dict(
+                    type="buttons",
+                    showactive=False,
+                    x=0.1, y=-0.1,
+                    buttons=[
+                        dict(label="播放 (Play)", method="animate", args=[None, {"frame": {"duration": 150, "redraw": True}, "fromcurrent": True}]),
+                        dict(label="暫停 (Pause)", method="animate", args=[[None], {"frame": {"duration": 0, "redraw": False}, "mode": "immediate", "transition": {"duration": 0}}])
+                    ]
+                )],
+                sliders=[dict(
+                    steps=[
+                        dict(
+                            method='animate',
+                            args=[[f'frame_{i}'], {'frame': {'duration': 150, 'redraw': True}, 'mode': 'immediate'}],
+                            label=f'{int(val*100)}%'
+                        )
+                        for i, val in enumerate(steps)
+                    ],
+                    x=0.25, y=-0.1, len=0.75,
+                    currentvalue=dict(font=dict(size=12), prefix='變形比例: ', visible=True, xanchor='right')
+                )]
+            )
+            
         # 設定合理的高度範圍
         z_bound = max(abs(Z.min()), abs(Z.max()))
         fig_3d.update_layout(
@@ -543,15 +672,17 @@ with tab_3d:
                 xaxis_title='X1 軸',
                 yaxis_title='X2 軸',
                 zaxis_title='Z 信心高度 f(x1, x2)',
+                xaxis=dict(range=[-2.2, 2.2]),
+                yaxis=dict(range=[-2.2, 2.2]),
                 zaxis=dict(range=[-z_bound, z_bound])
             )
         )
 
-    # 3D 畫布佈局
+    # 3D 畫布佈局通用調整
     fig_3d.update_layout(
         width=900,
         height=650,
-        margin=dict(l=0, r=0, b=0, t=30),
+        margin=dict(l=0, r=0, b=50, t=30),
         legend=dict(
             orientation='h',
             yanchor='bottom',
@@ -561,7 +692,7 @@ with tab_3d:
         )
     )
     
-    st.plotly_chart(fig_3d, use_container_width=True)
+    st.plotly_chart(fig_3d, width='stretch')
 
 # ==============================================================================
 # 標籤頁 3: Manim 概念教學動畫
