@@ -2,8 +2,8 @@ import streamlit as st
 import numpy as np
 import plotly.graph_objects as go
 import os
-from utils.data_generator import generate_concentric_circles
-from utils.svm_utils import fit_svm_model, get_decision_grid
+from src.utils.data_generator import generate_concentric_circles
+from src.utils.svm_utils import fit_svm_model, get_decision_grid
 
 # ------------------------------------------------------------------------------
 # 頁面配置與樣式設定
@@ -704,9 +704,10 @@ with tab_manim:
         "並在此特徵空間中被超平面線性分割，最後投影回二維平面形成圓形決策邊界的過程。"
     )
     
-    # 檢查預設路徑是否存在已生成的 MP4 影片檔案
+    # 檢查預設路徑是否存在已生成的 MP4 影片檔案 (支援從根目錄或 src 目錄下啟動)
     manim_paths = [
         "media/videos/phase1_manim_kernel_trick/1080p60/SVMKernelTrick3D.mp4",
+        "../media/videos/phase1_manim_kernel_trick/1080p60/SVMKernelTrick3D.mp4",
         "SVMKernelTrick3D.mp4"
     ]
     
@@ -724,7 +725,7 @@ with tab_manim:
         st.markdown("""
         請在終端機中執行以下指令進行影片渲染：
         ```bash
-        manim -pql phase1_manim_kernel_trick.py SVMKernelTrick3D
+        manim -pql src/phase1_manim_kernel_trick.py SVMKernelTrick3D
         ```
         影片生成後重新整理網頁，此處將會自動顯示播放器。
         """)

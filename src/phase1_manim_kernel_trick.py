@@ -1,6 +1,6 @@
 from manim import *
 import numpy as np
-from utils.data_generator import generate_concentric_circles
+from src.utils.data_generator import generate_concentric_circles
 
 class SVMKernelTrick3D(ThreeDScene):
     def construct(self):

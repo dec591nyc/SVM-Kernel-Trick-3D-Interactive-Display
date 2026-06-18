@@ -1,91 +1,146 @@
-# SVM Kernel Trick 3D Interactive Display
+# ⚛️ SVM Kernel Trick 3D Interactive Demonstration
 
-An educational platform and mathematical visualization tool designed to explain the **Support Vector Machine (SVM) Kernel Trick** using concentric circles.
+[![Python Version](https://img.shields.io/badge/python-3.8+-blue.svg?style=flat-square)](https://www.python.org/)
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://streamlit.io/)
+[![Plotly](https://img.shields.io/badge/Plotly-3D_Interactive-FF7F0E.svg?style=flat-square)](https://plotly.com/)
+[![Manim CE](https://img.shields.io/badge/Manim-Community_Edition-2E8B57.svg?style=flat-square)](https://www.manim.community/)
+[![License](https://img.shields.io/badge/license-MIT-green.svg?style=flat-square)](LICENSE)
 
-This project guides students and machine learning developers through the transition from non-linearly separable 2D space to linearly separable 3D feature spaces, showcasing both explicit coordinate lifting and continuous RBF decision surfaces.
+An educational interactive platform and mathematical visualization tool designed to explain the mechanics of the **Support Vector Machine (SVM) Kernel Trick** using concentric circle datasets.
+
+This project takes students and machine learning developers on a journey from a non-linearly separable 2D space to a linearly separable 3D feature space, showcasing both **explicit coordinate lifting (paraboloid projection)** and **continuous RBF decision surfaces** with smooth interactive transitions.
 
 ---
 
-## 📂 Project Structure
+## 📖 Table of Contents
+1. [Core Features](#-core-features)
+2. [Mathematical Background](#-mathematical-background)
+3. [Repository Reorganization](#-repository-reorganization)
+4. [Installation and Setup](#-installation-and-setup)
+5. [Running the Application](#-running-the-application)
+    - [Phase 1: Render Manim Concept Animation](#phase-1-render-manim-concept-animation)
+    - [Phase 2: Run Mathematical Verification](#phase-2-run-mathematical-verification)
+    - [Phase 3: Run Interactive Streamlit Web App](#phase-3-run-interactive-streamlit-web-app)
+6. [Design and Color Palette Guidelines](#-design-and-color-palette-guidelines)
+7. [License](#-license)
+
+---
+
+## 🌟 Core Features
+
+- **2D Projection Plane**: Real-time classification boundaries, margin bounds ($f(x, y) = \pm 1$), and highlighted support vectors with locked axis ranges (`[-2.2, 2.2]`) to prevent layout shifts.
+- **3D Feature Lifting (Plotly)**: Dynamic coordinate transition animations that lift data points smoothly from $z = 0$ up to the paraboloid surface $z = x^2 + y^2$, showing the separating hyperplane slice in action.
+- **RBF Landscape Morphing (Plotly)**: Visualizes the true RBF decision landscape by morphing a flat 2D plane into a 3D decision confidence topography $z = f(x, y)$ client-side.
+- **Manim Educational Video**: Embedded pre-rendered mathematical animation illustrating the transition from 2D coordinates to 3D space.
+- **Customizable Color Themes**: Switch between **Modern Blue/Red** and **Manim Sakura/Sky** directly from the sidebar.
+
+---
+
+## 🔬 Mathematical Background
+
+### 1. Inseparable 2D Space
+Concentric circles (inner Class 0 and outer Class 1) cannot be separated by any 2D straight line of the form:
+$$w_1 x_1 + w_2 x_2 + b = 0$$
+
+### 2. Explicit 3D Lifting Function
+We can lift the coordinates explicitly into 3D space using the mapping:
+$$\Phi(x, y) = \left(x, y, x^2 + y^2\right)$$
+Because the inner circle has a smaller radius, the points lie at the bottom of the paraboloid ($z \approx 0.16$), while the outer circle points sit higher up ($z \approx 1.0$). A flat separating hyperplane at $z = 0.5$ cleanly separates the two classes.
+
+### 3. True RBF Kernel Space
+The Radial Basis Function (RBF) Kernel is defined as:
+$$K(\mathbf{x}, \mathbf{x}') = \exp\left(-\gamma \|\mathbf{x} - \mathbf{x}'\|^2\right)$$
+It maps features into an **infinite-dimensional Hilbert space**. We visualize this landscape via the 3D confidence topography:
+$$z = f(x_1, x_2) = \sum_i \alpha_i y_i K(\mathbf{x}_i, \mathbf{x}) + b$$
+
+---
+
+## 📂 Repository Reorganization
+
+The codebase is structured under the `src/` directory to isolate execution logic from workspace meta-files:
 
 ```text
-├── README.md                      # Project documentation and guide
-├── requirements.txt               # Required Python packages
-├── phase1_manim_kernel_trick.py   # Manim CE concept animation script
-├── phase2_rbf_decision_surface.py # Matplotlib math verification script
-├── phase3_streamlit_app.py        # Streamlit interactive web dashboard
-├── utils/
-│   ├── data_generator.py          # Concentric circles dataset generator
-│   └── svm_utils.py               # Shared ML fitting and grid utilities
-├── assets/                        # Video and image outputs
-└── outputs/                       # Verification plots
+├── README.md                      # Comprehensive developer guide
+├── requirements.txt               # Dependencies listing
+├── outputs/                       # Rendered verification plots
+├── media/                         # Manim CE output folders & video assets
+└── src/                           # Source directory package root
+    ├── __init__.py
+    ├── phase1_manim_kernel_trick.py   # Manim CE concept animation script
+    ├── phase2_rbf_decision_surface.py # Matplotlib math verification script
+    ├── phase3_streamlit_app.py        # Streamlit interactive web dashboard
+    └── utils/                         # Shared utilities module
+        ├── __init__.py
+        ├── data_generator.py          # Concentric circles dataset generator
+        └── svm_utils.py               # Shared ML fitting & stable mesh-grids
 ```
-
----
-
-## ⚛️ The Mathematical Story
-
-1. **Inseparable 2D Space:**
-   Concentric circles (an inner cluster of Blue points and an outer cluster of Red points) cannot be separated by a straight 2D line.
-   
-2. **Conceptual 3D Lifting Function:**
-   We can lift the coordinates explicitly into 3D using the mapping:
-   $$\phi(x, y) = (x, y, x^2 + y^2)$$
-   This places all points onto a 3D paraboloid surface. Because the inner points have a smaller radius, they sit at the bottom of the paraboloid ($z \approx 0.16$), while the outer points sit higher up ($z \approx 1.0$).
-   
-3. **Linear Separation in 3D:**
-   In 3D, a flat plane (hyperplane) at $z = c$ (e.g. $z = 0.5$) separates the two classes cleanly.
-   
-4. **Projection Back to 2D:**
-   The intersection of the plane $z = c$ and the paraboloid $z = x^2 + y^2$ forms a circle: $x^2 + y^2 = c$. Projecting this circle back to 2D gives the circular decision boundary.
-
-5. **True RBF Kernel Space:**
-   While the paraboloid is useful for visualization, the **Radial Basis Function (RBF) Kernel** ($K(x, x') = \exp(-\gamma \|x - x'\|^2)$) actually maps features into an **infinite-dimensional Hilbert space**. We visualize this landscape via the 3D classification confidence landscape:
-   $$z = f(x, y)$$
 
 ---
 
 ## 🛠️ Installation and Setup
 
-1. **Clone the repository** and navigate to the root directory.
+1. **Clone the repository** and navigate to the project directory:
+   ```bash
+   git clone https://github.com/dec591nyc/SVM-Kernel-Trick-3D-Interactive-Display.git
+   cd SVM-Kernel-Trick-3D-Interactive-Display
+   ```
 
-2. **Install the dependencies:**
-   Make sure you have Python installed, then run:
+2. **Install Python dependencies**:
    ```bash
    pip install -r requirements.txt
    ```
-   *Note: If you plan to render the Manim CE animation (Phase 1), ensure you have [FFmpeg](https://ffmpeg.org/) installed on your operating system.*
+   *(Note: Rendering the Manim video locally requires installing [FFmpeg](https://ffmpeg.org/) on your operating system).*
 
 ---
 
-## 🚀 How to Run
+## 🚀 Running the Application
+
+Set your python path environment variable to the repository root directory before running files inside `src/` to ensure internal dependencies load correctly.
 
 ### Phase 1: Render Manim Concept Animation
-To generate the high-quality concept video explaining the 2D to 3D mapping:
+To render the high-quality concept video explaining the 2D to 3D mapping:
 ```bash
-manim -pqh phase1_manim_kernel_trick.py SVMKernelTrick3D
+# High Quality (1080p)
+manim -pqh src/phase1_manim_kernel_trick.py SVMKernelTrick3D
+
+# Low Quality (480p - fast render draft)
+manim -pql src/phase1_manim_kernel_trick.py SVMKernelTrick3D
 ```
-*Use `-pql` instead of `-pqh` for a fast, low-resolution draft render.*
 
 ### Phase 2: Run Mathematical Verification
-To verify the RBF SVM fit, plot decision contours, margins, and support vectors:
+To verify the RBF SVM fit, plot decision contours, margins, and support vectors statically:
 ```bash
-python phase2_rbf_decision_surface.py
+python -m src.phase2_rbf_decision_surface
 ```
-This saves a high-resolution plot to `outputs/verification_plot.png`.
+This saves the high-resolution visualization to `outputs/verification_plot.png`.
 
-### Phase 3: Start Streamlit Interactive App
-To run the interactive web app locally:
+### Phase 3: Run Interactive Streamlit Web App
+To boot the interactive Streamlit dashboard locally:
 ```bash
-streamlit run phase3_streamlit_app.py
+# Windows (PowerShell)
+$env:PYTHONPATH="."
+streamlit run src/phase3_streamlit_app.py --server.port 8501 --server.address 127.0.0.1
+
+# Linux / macOS (Bash)
+PYTHONPATH=. streamlit run src/phase3_streamlit_app.py --server.port 8501 --server.address 127.0.0.1
 ```
-This opens a browser tab with the dashboard, allowing you to tweak parameters ($C$, $\gamma$, noise, degree) in real-time.
+Open **[http://127.0.0.1:8501](http://127.0.0.1:8501)** in your browser to interact with the visualizations.
 
 ---
 
-## 🎨 Visual Guidelines & Consistency
-* **Inner Class (Class 0):** Blue
-* **Outer Class (Class 1):** Red
-* **Decision Boundary ($f(x, y) = 0$):** Yellow
-* **Support Vectors:** Outlined in Gold
-* **Margins ($f(x, y) = \pm 1$):** Dashed slate-gray lines
+## 🎨 Design and Color Palette Guidelines
+
+For a unified visual narrative, the graphics maintain color consistency:
+
+| Component | Modern Blue/Red | Manim Sakura/Sky |
+| :--- | :---: | :---: |
+| **Class 0 (Inner)** | `#3b82f6` (Vibrant Blue) | `#ffb7c5` (Sakura Pink) |
+| **Class 1 (Outer)** | `#ef4444` (Vibrant Red) | `#a5f3fc` (Sky Blue) |
+| **Decision Boundary** | `#eab308` (Gold Yellow) | `#facc15` (Light Yellow) |
+| **Support Vectors** | Outlined in Gold | Outlined in Gold |
+| **Margins ($f=\pm 1$)** | Slate Gray (Dashed) | Slate Gray (Dashed) |
+
+---
+
+## 📄 License
+This project is licensed under the MIT License - see the LICENSE file for details.

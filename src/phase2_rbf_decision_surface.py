@@ -1,8 +1,8 @@
 import os
 import numpy as np
 import matplotlib.pyplot as plt
-from utils.data_generator import generate_concentric_circles
-from utils.svm_utils import fit_svm_model, get_decision_grid
+from src.utils.data_generator import generate_concentric_circles
+from src.utils.svm_utils import fit_svm_model, get_decision_grid
 
 def main():
     # 1. 建立 outputs 資料夾 (如果不存在)
