@@ -95,8 +95,6 @@ The codebase is structured under the `src/` directory to isolate execution logic
 
 ## 🚀 Running the Application
 
-Set your python path environment variable to the repository root directory before running files inside `src/` to ensure internal dependencies load correctly.
-
 ### Phase 1: Render Manim Concept Animation
 To render the high-quality concept video explaining the 2D to 3D mapping:
 ```bash
@@ -110,19 +108,14 @@ manim -pql src/phase1_manim_kernel_trick.py SVMKernelTrick3D
 ### Phase 2: Run Mathematical Verification
 To verify the RBF SVM fit, plot decision contours, margins, and support vectors statically:
 ```bash
-python -m src.phase2_rbf_decision_surface
+python src/phase2_rbf_decision_surface.py
 ```
 This saves the high-resolution visualization to `outputs/verification_plot.png`.
 
 ### Phase 3: Run Interactive Streamlit Web App
 To boot the interactive Streamlit dashboard locally:
 ```bash
-# Windows (PowerShell)
-$env:PYTHONPATH="."
 streamlit run src/phase3_streamlit_app.py --server.port 8501 --server.address 127.0.0.1
-
-# Linux / macOS (Bash)
-PYTHONPATH=. streamlit run src/phase3_streamlit_app.py --server.port 8501 --server.address 127.0.0.1
 ```
 Open **[http://127.0.0.1:8501](http://127.0.0.1:8501)** in your browser to interact with the visualizations.
 
@@ -132,13 +125,13 @@ Open **[http://127.0.0.1:8501](http://127.0.0.1:8501)** in your browser to inter
 
 For a unified visual narrative, the graphics maintain color consistency:
 
-| Component | Modern Blue/Red | Manim Sakura/Sky |
-| :--- | :---: | :---: |
-| **Class 0 (Inner)** | `#3b82f6` (Vibrant Blue) | `#ffb7c5` (Sakura Pink) |
-| **Class 1 (Outer)** | `#ef4444` (Vibrant Red) | `#a5f3fc` (Sky Blue) |
-| **Decision Boundary** | `#eab308` (Gold Yellow) | `#facc15` (Light Yellow) |
-| **Support Vectors** | Outlined in Gold | Outlined in Gold |
-| **Margins ($f=\pm 1$)** | Slate Gray (Dashed) | Slate Gray (Dashed) |
+| Component | Modern Blue/Red |
+| :--- | :---: |
+| **Class 0 (Inner)** | `#3b82f6` (Vibrant Blue) |
+| **Class 1 (Outer)** | `#ef4444` (Vibrant Red) |
+| **Decision Boundary** | `#eab308` (Gold Yellow) |
+| **Support Vectors** | Outlined in Gold |
+| **Margins ($f=\pm 1$)** | Slate Gray (Dashed) |
 
 ---
 

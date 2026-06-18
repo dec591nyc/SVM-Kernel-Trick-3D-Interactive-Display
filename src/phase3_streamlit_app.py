@@ -2,8 +2,8 @@ import streamlit as st
 import numpy as np
 import plotly.graph_objects as go
 import os
-from src.utils.data_generator import generate_concentric_circles
-from src.utils.svm_utils import fit_svm_model, get_decision_grid
+from utils.data_generator import generate_concentric_circles
+from utils.svm_utils import fit_svm_model, get_decision_grid
 
 # ------------------------------------------------------------------------------
 # 頁面配置與樣式設定
