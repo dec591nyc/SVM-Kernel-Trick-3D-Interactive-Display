@@ -576,7 +576,6 @@ with tab_manim:
     # 檢查預設路徑是否存在已生成的 MP4 影片檔案
     manim_paths = [
         "media/videos/phase1_manim_kernel_trick/1080p60/SVMKernelTrick3D.mp4",
-        "media/videos/phase1_manim_kernel_trick/480p15/SVMKernelTrick3D.mp4",
         "SVMKernelTrick3D.mp4"
     ]
     

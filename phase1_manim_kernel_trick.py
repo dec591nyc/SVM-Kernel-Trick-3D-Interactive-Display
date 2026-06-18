@@ -67,8 +67,8 @@ class SVMKernelTrick3D(ThreeDScene):
         )
         axes.center()
         
-        # 產生同心圓資料點 (樣本點 50 個，避免動畫過於擁擠)
-        X, y = generate_concentric_circles(noise=0.04, n_samples=50, random_seed=42)
+        # 產生同心圓資料點 (樣本點 30 個，避免動畫過於擁擠)
+        X, y = generate_concentric_circles(noise=0.04, n_samples=30, random_seed=42)
         
         # 建立 Manim 中的 Dot 資料點群組 (櫻花粉與晴空藍)
         dots = VGroup()
@@ -165,6 +165,7 @@ class SVMKernelTrick3D(ThreeDScene):
             lambda u, v: axes.c2p(u, v, u**2 + v**2),
             u_range=[-1.6, 1.6],
             v_range=[-1.6, 1.6],
+            resolution=(16, 16),
             fill_opacity=0.35,
             checkerboard_colors=["#1e1b4b", "#0284c7"]  # 深靛色到晴空天藍
         )
@@ -190,6 +191,7 @@ class SVMKernelTrick3D(ThreeDScene):
             lambda u, v: axes.c2p(u, v, plane_height),
             u_range=[-1.6, 1.6],
             v_range=[-1.6, 1.6],
+            resolution=(4, 4),
             fill_opacity=0.4,
             checkerboard_colors=["#b45309", "#d97706"]  # 溫暖的日落橙橘色
         )
