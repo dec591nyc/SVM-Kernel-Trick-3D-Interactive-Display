@@ -1,7 +1,4 @@
-manim
+streamlit
 numpy
 scikit-learn
-matplotlib
-streamlit
 plotly
-pandas
