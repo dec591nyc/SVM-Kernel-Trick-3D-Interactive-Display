@@ -40,8 +40,8 @@ flowchart TD
         E["圓形決策邊界 <br>x² + y² = c"]
     end
 
-    A -->|1. 座標拉升 (Lifting)| B
-    D -->|2. 降維投影 (Projection)| E
+    A -->|"1. 座標拉升 (Lifting)"| B
+    D -->|"2. 降維投影 (Projection)"| E
 ```
 
 ---
